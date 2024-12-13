@@ -1,15 +1,30 @@
-import torch
-from torch.utils.data import Dataset
+#
+# Takes gregg-1916 dataset with labels in filenames and converts to CSV-labeled data
+#
 
-class ShorthandGenerationDataset(Dataset):
-    def __init__(self, files, max_H, max_W, aug_types, max_label_len, channels):
-        # Initialize dataset, you can use the same logic as in your Keras dataloader
-        pass
+import os
+import csv
+from pathlib import Path
 
-    def __len__(self):
-        # Return the total number of samples
-        pass
+data_folder = '../data'  
+output_folder = '../data-labeled' 
 
-    def __getitem__(self, idx):
-        # Generate one sample of data
-        pass
+def generate_csv_from_data_folder(data_folder, output_folder, csv_filename='labels.csv'):
+    data_folder = Path(data_folder)
+    output_folder = Path(output_folder)
+    output_folder.mkdir(parents=True, exist_ok=True)
+
+    csv_path = output_folder / csv_filename
+
+    with open(csv_path, mode='w', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(['filename', 'label'])
+
+        for file in data_folder.iterdir():
+            if file.is_file():
+                label = file.stem  # Get the filename without the extension
+                writer.writerow([file.name, label])
+
+    print(f"CSV file generated at: {csv_path}")
+
+generate_csv_from_data_folder(data_folder, output_folder)
