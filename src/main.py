@@ -4,7 +4,7 @@ from torch.nn.utils.rnn import pad_sequence
 from model import Model
 from dataloader import ShorthandGenerationDataset, data_split
 from config import CONFIG
-from tqdm import tqdm 
+from tqdm import tqdm  # Import tqdm for progress bar
 
 def collate_fn(batch):
     # print(batch) # debugging
@@ -30,6 +30,7 @@ test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False, collate_fn=
 config = CONFIG()
 model = Model(max_H, max_W, config)
 
+# Example training loop
 num_epochs = 10  # Define the number of epochs
 for epoch in range(num_epochs):
     model.train()
