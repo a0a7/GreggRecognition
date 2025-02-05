@@ -20,7 +20,7 @@ def data_split():
     files = os.listdir(folder)
     period = int(np.round(1 / val_proportion))
 
-    # Split  here
+    # Split logic here
     train_files = files[::period]
     val_files = files[1::period]
     test_files = files[2::period]
