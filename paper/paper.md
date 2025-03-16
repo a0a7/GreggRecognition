@@ -59,6 +59,6 @@ possible benefits for the preservation of world languages and cultures.
 
 # Acknowledgements
 
-We acknowledge support from Patricia Price, Gus Davidson, Zackary Pace and Henry Doten during the development of this project as part of the Minnetonka Research program.
+We acknowledge non-financial support from Patricia Price, Gus Davidson, Zackary Pace and Henry Doten during the development of this project as part of the Minnetonka Research program.
 
 # References
