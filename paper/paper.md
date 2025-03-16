@@ -1,5 +1,5 @@
 ---
-title: 'Novel Error-corrected deep learning approach to handwritten text recognition of Gregg shorthand'
+title: 'Novel error-corrected deep learning approach to handwritten text recognition of Gregg shorthand'
 tags:
   - Python
   - handwritten text recognition
@@ -23,13 +23,7 @@ bibliography: paper.bib
 
 Shorthand, also known as pen stenography, is a family of writing systems for English and
 other languages that emerged out of a need for a fast and efficient writing system in a pre-digital age. Of the many English shorthand systems, Gregg shorthand is the most prevalent
-(Zhai et al., 2018). While largely made obsolete by general-purpose computers, the cultural
-and legal value within old shorthand documents means that being able to efficiently scan
-shorthand documents into modern computer systems holds significant value. This investigation
-explored the implementation of a model built around a Gated Convolutional Neural network
-for purposes of handwritten text recognition of Gregg shorthand. An accuracy of 0.04 was
-achieved after minimal training. The finalized model is freely licensed and made available
-online for public access.
+[@zhai2018]. This paper presents GreggRecognition, a novel deep learning tool for handwritten text recognition of Gregg shorthand made for the purpose of preservation of shorthand documents with historical value. 
 
 # Statement of need
 
@@ -37,7 +31,7 @@ Shorthand, also known as pen stenography, is a family of writing systems for Eng
 that emerged out of a need for a fast and efficient
 writing system in a pre-digital age.
 Of the many English shorthand systems, Gregg
-shorthand—first developed in 1888—is the most
+shorthand is the most
 prevalent [@zhai2018]. With the advent of
 digital text input and storage, shorthand has largely
 fallen out of use in favor of standard typing and digital stenography [@rajasekaran2012].
