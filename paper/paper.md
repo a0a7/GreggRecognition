@@ -1,5 +1,5 @@
 ---
-title: 'Novel error-corrected deep learning approach to handwritten text recognition of Gregg shorthand'
+title: 'GreggRecognition: Novel error-corrected deep learning approach to handwritten text recognition of Gregg shorthand'
 tags:
   - Python
   - handwritten text recognition
@@ -14,7 +14,7 @@ affiliations:
  - name: University of Minnesota, United States
    index: 1
    ror: 017zqws13
-date: 20 July 2025
+date: 20 August 2025
 bibliography: paper.bib
 
 ---
@@ -23,7 +23,7 @@ bibliography: paper.bib
 
 Shorthand, also known as pen stenography, is a family of writing systems for English and
 other languages that emerged out of a need for a fast and efficient writing system in a pre-digital age. Of the many English shorthand systems, Gregg shorthand is the most prevalent
-[@zhai2018]. This paper presents GreggRecognition, a novel deep learning tool for handwritten text recognition of Gregg shorthand made for the purpose of preservation of shorthand documents with historical value. 
+[@zhai2018]. This paper presents GreggRecognition, a novel deep learning tool for handwritten text recognition of Gregg shorthand made for the purpose of analysis and preservation of documents written in Gregg shorthand, often of historical value. 
 
 # Statement of need
 
@@ -46,12 +46,12 @@ of fields where time-efficient handwriting was necessary in the past, such as la
 digitization and thereby preservation of shorthand
 documents, therefore, presents possible benefits in
 preservation of history and culture. Further, the development of extensible HTR and OCR systems, in
-this case with a focus on English shorthand, feasibly
+this case with a focus on Gregg shorthand, feasibly
 opens avenues for the creation of HTR and OCR
 systems for other written languages—thus presenting
 possible benefits for the preservation of world languages and cultures.
 
-GreggRecognition, a novel deep learning approach to handwritten text recognition of Gregg shorthand was developed to meet this need. GreggRecognition is based on the Gated Recurrent Unit (GRU) architecture, and was developed using the Pytorch framework. It was trained on the Gregg-1916 dataset introduced by Zhai et. al. in 2018, comprising greater than 16,000 Gregg shorthand words [@zhai2018].
+GreggRecognition, a novel deep learning approach to handwritten text recognition of Gregg shorthand was developed to meet these various research needs. GreggRecognition is based on the Gated Recurrent Unit (GRU) architecture, and was developed using the Pytorch framework. It was trained on the Gregg-1916 dataset introduced by Zhai et. al. in 2018, comprising greater than 16,000 Gregg shorthand words [@zhai2018].
 
 # Acknowledgements
 
