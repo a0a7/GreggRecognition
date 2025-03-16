@@ -21,81 +21,44 @@ bibliography: paper.bib
 
 # Summary
 
-The forces on stars, galaxies, and dark matter under external gravitational
-fields lead to the dynamical evolution of structures in the universe. The orbits
-of these bodies are therefore key to understanding the formation, history, and
-future state of galaxies. The field of "galactic dynamics," which aims to model
-the gravitating components of galaxies to study their structure and evolution,
-is now well-established, commonly taught, and frequently used in astronomy.
-Aside from toy problems and demonstrations, the majority of problems require
-efficient numerical tools, many of which require the same base code (e.g., for
-performing numerical orbit integration).
+Shorthand, also known as pen stenography, is a family of writing systems for English and
+other languages that emerged out of a need for a fast and efficient writing system in a pre-digital age. Of the many English shorthand systems, Gregg shorthand is the most prevalent
+(Zhai et al., 2018). While largely made obsolete by general-purpose computers, the cultural
+and legal value within old shorthand documents means that being able to efficiently scan
+shorthand documents into modern computer systems holds significant value. This investigation
+explored the implementation of a model built around a Gated Convolutional Neural network
+for purposes of handwritten text recognition of Gregg shorthand. An accuracy of 0.04 was
+achieved after minimal training. The finalized model is freely licensed and made available
+online for public access.
 
 # Statement of need
 
-`Gala` is an Astropy-affiliated Python package for galactic dynamics. Python
-enables wrapping low-level languages (e.g., C) for speed without losing
-flexibility or ease-of-use in the user-interface. The API for `Gala` was
-designed to provide a class-based and user-friendly interface to fast (C or
-Cython-optimized) implementations of common operations such as gravitational
-potential and force evaluation, orbit integration, dynamical transformations,
-and chaos indicators for nonlinear dynamics. `Gala` also relies heavily on and
-interfaces well with the implementations of physical units and astronomical
-coordinate systems in the `Astropy` package [@astropy] (`astropy.units` and
-`astropy.coordinates`).
+Shorthand, also known as pen stenography, is a family of writing systems for English and other languages
+that emerged out of a need for a fast and efficient
+writing system in a pre-digital age.
+Of the many English shorthand systems, Gregg
+shorthand—first developed in 1888—is the most
+prevalent [@zhai2018]. With the advent of
+digital text input and storage, shorthand has largely
+fallen out of use in favor of standard typing and digital stenography [@rajasekaran2012].
 
-`Gala` was designed to be used by both astronomical researchers and by
-students in courses on gravitational dynamics or astronomy. It has already been
-used in a number of scientific publications [@Pearson:2017] and has also been
-used in graduate courses on Galactic dynamics to, e.g., provide interactive
-visualizations of textbook material [@Binney:2008]. The combination of speed,
-design, and support for Astropy functionality in `Gala` will enable exciting
-scientific explorations of forthcoming data releases from the *Gaia* mission
-[@gaia] by students and experts alike.
+The transliteration of short-hand scripts into regular text presents a unique challenge for several reasons. Shorthand characters
+often lack distinct features, sometimes varying only
+in length or degree of curvature [@Gregg2001Jan]. Furthermore, shorthand lexicons are often simplified, often missing vowels or other defining features of words. While the human mind can accommodate for these kinds of omissions, creating a digital system that can do the same poses a challenge.
 
-# Mathematics
-
-Single dollars ($) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
-
-Double dollars make self-standing equations:
-
-$$\Theta(x) = \left\{\begin{array}{l}
-0\textrm{ if } x < 0\cr
-1\textrm{ else}
-\end{array}\right.$$
-
-You can also use plain \LaTeX for equations
-\begin{equation}\label{eq:fourier}
-\hat f(\omega) = \int_{-\infty}^{\infty} f(x) e^{i\omega x} dx
-\end{equation}
-and refer to \autoref{eq:fourier} from text.
-
-# Citations
-
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
-
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred
-citation) then you can do it with the example BibTeX entry below for @fidgit.
-
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
-
-# Figures
-
-Figures can be included like this:
-![Caption for example figure.\label{fig:example}](figure.png)
-and referenced from text using \autoref{fig:example}.
-
-Figure sizes can be customized by adding an optional second parameter:
-![Caption for example figure.](figure.png){ width=20% }
+Reading of manuscripts written in shorthand is
+vital to understanding documents in a wide variety
+of fields where time-efficient handwriting was necessary in the past, such as law and medicine. The
+digitization and thereby preservation of shorthand
+documents, therefore, presents possible benefits in
+preservation of history and culture. Further, the development of extensible HTR and OCR systems, in
+this case with a focus on English shorthand, feasibly
+opens avenues for the creation of HTR and OCR
+systems for other written languages—thus presenting
+possible benefits for the preservation of world languages and cultures.
 
 # Acknowledgements
 
-We acknowledge contributions from Brigitta Sipocz, Syrtis Major, and Semyeong
-Oh, and support from Kathryn Johnston during the genesis of this project.
+We acknowledge support from Patricia Price, Gus Davidson, Zackary Pace and Henry Doten during the development of this project as part of the Minnetonka Research program.
 
 # References
