@@ -48,19 +48,39 @@ class Model(nn.Module):
         super(Model, self).__init__()
         self.feature_extractor = FeatureExtractor()
         self.flatten = nn.Flatten()
-        self.fc = nn.Linear(256 * (H // 8) * (W // 8), config.RNN_size)
+        
+        # Calculate the size after convolutions and pooling
+        conv_output_size = 256 * (H // 8) * (W // 8)
+        
+        self.fc = nn.Linear(conv_output_size, config.RNN_size)
         self.embedding = nn.Embedding(config.vocabulary_size, config.embedding_size)
         self.gru = nn.GRU(config.embedding_size, config.RNN_size, batch_first=True)
         self.dropout = nn.Dropout(config.drop_out)
         self.fc_out = nn.Linear(config.RNN_size, config.vocabulary_size)
+        
+        self.config = config
 
     def forward(self, img, x_context):
+        batch_size = img.size(0)
+        
+        # Extract image features
         img_f = self.feature_extractor(img)
         img_f = self.flatten(img_f)
         img_f = F.relu(self.fc(img_f))
         
+        # Create initial hidden state from image features
+        h_0 = img_f.unsqueeze(0)  # (1, batch_size, hidden_size)
+        
+        # Embed the context sequence
         x_seq_embedding = self.embedding(x_context)
-        h_t, _ = self.gru(x_seq_embedding, img_f.unsqueeze(0))
+        
+        # Pass through GRU with image features as initial hidden state
+        h_t, _ = self.gru(x_seq_embedding, h_0)
+        
+        # Apply dropout
         h_t_dropped = self.dropout(h_t)
-        predictions = F.softmax(self.fc_out(h_t_dropped), dim=-1)
+        
+        # Get predictions for next character
+        predictions = self.fc_out(h_t_dropped)
+        
         return predictions
