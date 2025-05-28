@@ -3,6 +3,8 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 from PIL import Image, ImageOps
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
 from config import CONFIG
 
 def rgb2grey(rgb):
