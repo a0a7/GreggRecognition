@@ -5,3 +5,6 @@ pandas
 scikit-learn
 matplotlib
 tqdm
+Pillow
+seaborn
+editdistance
