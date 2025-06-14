@@ -54,15 +54,22 @@ for epoch in range(num_epochs):
     
     model.eval()
     val_loss = 0
+    correct = 0
+    total = 0
     with torch.no_grad():
         for imgs, labels, targets in val_loader:
             imgs, labels, targets = imgs.to(device), labels.to(device), targets.to(device)
             outputs = model(imgs, labels)
             outputs_flat = outputs.view(-1, outputs.size(-1))
             val_loss += criterion(outputs_flat, targets.view(-1)).item()
+            
+            _, predicted = torch.max(outputs_flat.data, 1)
+            total += targets.view(-1).size(0)
+            correct += (predicted == targets.view(-1)).sum().item()
     
     val_loss = val_loss / len(val_loader)
-    print(f'Epoch {epoch+1}, Val Loss: {val_loss:.4f}')
+    accuracy = 100 * correct / total
+    print(f'Epoch {epoch+1}, Val Loss: {val_loss:.4f}, Accuracy: {accuracy:.2f}%')
     
     if val_loss < best_val_loss:
         best_val_loss = val_loss
