@@ -9,6 +9,27 @@ from config import CONFIG
 from tqdm import tqdm
 import os
 
+def evaluate_model(model, test_loader, device, criterion):
+    model.eval()
+    test_loss = 0
+    correct = 0
+    total = 0
+    
+    with torch.no_grad():
+        for imgs, labels, targets in test_loader:
+            imgs, labels, targets = imgs.to(device), labels.to(device), targets.to(device)
+            outputs = model(imgs, labels)
+            outputs_flat = outputs.view(-1, outputs.size(-1))
+            test_loss += criterion(outputs_flat, targets.view(-1)).item()
+            
+            _, predicted = torch.max(outputs_flat.data, 1)
+            total += targets.view(-1).size(0)
+            correct += (predicted == targets.view(-1)).sum().item()
+    
+    test_loss = test_loss / len(test_loader)
+    accuracy = 100 * correct / total
+    return test_loss, accuracy
+
 def collate_fn(batch):
     imgs, labels, additional = zip(*batch)
     imgs = pad_sequence(imgs, batch_first=True, padding_value=0)
@@ -75,3 +96,7 @@ for epoch in range(num_epochs):
         best_val_loss = val_loss
         torch.save(model.state_dict(), 'models/best_model.pth')
         print(f'New best model saved with loss: {val_loss:.4f}')
+
+print('Training completed!')
+test_loss, test_accuracy = evaluate_model(model, test_loader, device, criterion)
+print(f'Test Loss: {test_loss:.4f}, Test Accuracy: {test_accuracy:.2f}%')
