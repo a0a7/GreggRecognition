@@ -54,6 +54,7 @@ model = model.to(device)
 
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=config.learning_rate)
+scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.5)
 
 os.makedirs('models', exist_ok=True)
 best_val_loss = float('inf')
@@ -91,6 +92,8 @@ for epoch in range(num_epochs):
     val_loss = val_loss / len(val_loader)
     accuracy = 100 * correct / total
     print(f'Epoch {epoch+1}, Val Loss: {val_loss:.4f}, Accuracy: {accuracy:.2f}%')
+    
+    scheduler.step()
     
     if val_loss < best_val_loss:
         best_val_loss = val_loss
