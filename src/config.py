@@ -13,10 +13,12 @@ class CONFIG:
     weight_decay = 1e-5
     gradient_clip = 1.0
     
-    use_mixed_precision = True  # Use automatic mixed precision for faster training
-    num_workers = 4  # Number of data loading workers
-    pin_memory = True  # Pin memory for faster GPU transfer
-    compile_model = True  # Use torch.compile for faster inference (PyTorch 2.0+)
+    use_mixed_precision = True 
+    num_workers = 0 if os.name == 'nt' else 4 
+    pin_memory = True  # Will be disabled automatically if no GPU
+    compile_model = True  # torch.compile 
+    prefetch_factor = 2  # how many batches to prefetch
+    persistent_workers = False  # enable if not on windows
     
     dataset_source = 'local'  # local or huggingface
     hf_dataset_name = 'a0a7/Gregg-1916'

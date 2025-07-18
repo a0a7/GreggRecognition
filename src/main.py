@@ -75,24 +75,39 @@ else:
 
 tracker = TrainingTracker()
 
+# Dynamically adjust pin_memory based on GPU availability
+actual_pin_memory = config.pin_memory and torch.cuda.is_available()
+
 train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, collate_fn=collate_fn, 
-                         num_workers=config.num_workers, pin_memory=config.pin_memory)
+                         num_workers=config.num_workers, pin_memory=actual_pin_memory,
+                         prefetch_factor=config.prefetch_factor if config.num_workers > 0 else None, 
+                         persistent_workers=config.persistent_workers and config.num_workers > 0)
 val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False, collate_fn=collate_fn,
-                       num_workers=config.num_workers, pin_memory=config.pin_memory)
+                       num_workers=config.num_workers, pin_memory=actual_pin_memory,
+                       prefetch_factor=config.prefetch_factor if config.num_workers > 0 else None,
+                       persistent_workers=config.persistent_workers and config.num_workers > 0)
 test_loader = DataLoader(test_dataset, batch_size=config.batch_size, shuffle=False, collate_fn=collate_fn,
-                        num_workers=config.num_workers, pin_memory=config.pin_memory)
+                        num_workers=config.num_workers, pin_memory=actual_pin_memory,
+                        prefetch_factor=config.prefetch_factor if config.num_workers > 0 else None,
+                        persistent_workers=config.persistent_workers and config.num_workers > 0)
 
 model = Model(max_H, max_W, config)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = model.to(device)
 
-# Compile model for faster inference (PyTorch 2.0+)
-if config.compile_model and hasattr(torch, 'compile'):
-    try:
-        model = torch.compile(model)
-        print("Model compiled for faster training")
-    except Exception as e:
-        print(f"Model compilation failed: {e}")
+# Debug GPU information
+print(f"CUDA Available: {torch.cuda.is_available()}")
+if torch.cuda.is_available():
+    print(f"CUDA Device Count: {torch.cuda.device_count()}")
+    print(f"Current CUDA Device: {torch.cuda.current_device()}")
+    print(f"CUDA Device Name: {torch.cuda.get_device_name()}")
+    print(f"CUDA Version: {torch.version.cuda}")
+else:
+    print("CUDA not available - using CPU")
+
+# Dynamically adjust pin_memory based on GPU availability
+actual_pin_memory = config.pin_memory and torch.cuda.is_available()
+print(f"Using pin_memory: {actual_pin_memory}")
 
 print(f"Using device: {device}")
 
@@ -115,30 +130,60 @@ for epoch in range(num_epochs):
     num_batches = 0
     
     for imgs, labels, targets in tqdm(train_loader, desc=f"Epoch {epoch+1}"):
-        imgs, labels, targets = imgs.to(device), labels.to(device), targets.to(device)
+        imgs, labels, targets = imgs.to(device, non_blocking=True), labels.to(device, non_blocking=True), targets.to(device, non_blocking=True)
         
         optimizer.zero_grad()
-        outputs = model(imgs, labels)
         
-        # Handle output shape properly
-        if outputs.dim() == 3:
-            # If outputs are [batch, seq_len, vocab_size], take the last timestep
-            outputs = outputs[:, -1, :]  # [batch, vocab_size]
-        elif outputs.dim() == 2:
-            # Already [batch, vocab_size]
-            pass
-        else:
-            # Flatten to [batch, vocab_size]
-            outputs = outputs.view(outputs.size(0), -1)
-        
-        # Ensure targets are [batch]
-        if targets.dim() > 1:
-            targets = targets.view(-1)
+        # Mixed precision forward pass
+        if scaler:
+            with autocast():
+                outputs = model(imgs, labels)
+                
+                # Handle output shape properly
+                if outputs.dim() == 3:
+                    outputs = outputs[:, -1, :]
+                elif outputs.dim() == 2:
+                    pass
+                else:
+                    outputs = outputs.view(outputs.size(0), -1)
+                
+                if targets.dim() > 1:
+                    targets = targets.view(-1)
+                    
+                loss = criterion(outputs, targets)
             
-        loss = criterion(outputs, targets)
-        
-        loss.backward()
-        optimizer.step()
+            # Mixed precision backward pass
+            scaler.scale(loss).backward()
+            
+            # Gradient clipping
+            scaler.unscale_(optimizer)
+            utils.clip_grad_norm_(model.parameters(), config.gradient_clip)
+            
+            scaler.step(optimizer)
+            scaler.update()
+        else:
+            # Standard precision training
+            outputs = model(imgs, labels)
+            
+            # Handle output shape properly
+            if outputs.dim() == 3:
+                outputs = outputs[:, -1, :]
+            elif outputs.dim() == 2:
+                pass
+            else:
+                outputs = outputs.view(outputs.size(0), -1)
+            
+            if targets.dim() > 1:
+                targets = targets.view(-1)
+                
+            loss = criterion(outputs, targets)
+            
+            loss.backward()
+            
+            # Gradient clipping
+            utils.clip_grad_norm_(model.parameters(), config.gradient_clip)
+            
+            optimizer.step()
         
         epoch_loss += loss.item()
         num_batches += 1
