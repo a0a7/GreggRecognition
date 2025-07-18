@@ -42,6 +42,8 @@ Designed for use with the Gregg-1916 dataset introduced by Zhai et al. (2018), t
 
 ### training
 
+By default, the model uses the Hugging Face [Gregg-1916 dataset](https://huggingface.co/datasets/a0a7/Gregg-1916).
+
 ```bash
 cd src
 python main.py
@@ -49,8 +51,13 @@ python main.py
 
 The training process will generate training plots showing loss and accuracy curves. It will also save the best model to `models/best_model.pth` and evaluate it on the test set
 
+**to use a local dataset**
+1. Change `dataset_source = 'local'` in `src/config.py`
+2. Place shorthand images in `src/data/` directory (images named with corresponding text labels)
+
 ### config
 
+- `dataset_source`: Use 'huggingface' or 'local' (default: 'huggingface')
 - `learning_rate`: Initial learning rate (default: varies by config)
 - `batch_size`: Batch size for training (default: varies by config)
 - `vocabulary_size`: Size of character vocabulary
@@ -71,7 +78,4 @@ config = CONFIG()
 model = Model(max_H=256, max_W=256, config=config)
 model.load_state_dict(torch.load('models/best_model.pth'))
 model.eval()
-
-# Use model for prediction on new images
-# (see evaluation.py for detailed inference examples)
 ```

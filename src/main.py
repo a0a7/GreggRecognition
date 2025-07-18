@@ -5,10 +5,18 @@ from torch.utils.data import DataLoader
 from torch.nn.utils.rnn import pad_sequence
 from model import Model
 from dataloader import ShorthandGenerationDataset, data_split
+from hf_dataloader import create_hf_dataloaders, collate_fn_hf
 from config import CONFIG
 from utils.training_tracker import TrainingTracker
 from tqdm import tqdm
 import os
+
+def collate_fn(batch):
+    imgs, labels, additional = zip(*batch)
+    imgs = pad_sequence(imgs, batch_first=True, padding_value=0)
+    labels = pad_sequence(labels, batch_first=True, padding_value=0)
+    additional = torch.stack(additional)
+    return imgs, labels, additional
 
 def evaluate_model(model, test_loader, device, criterion):
     model.eval()
@@ -42,21 +50,28 @@ def evaluate_model(model, test_loader, device, criterion):
     accuracy = 100 * correct / total
     return test_loss, accuracy
 
-def collate_fn(batch):
-    imgs, labels, additional = zip(*batch)
-    imgs = pad_sequence(imgs, batch_first=True, padding_value=0)
-    labels = pad_sequence(labels, batch_first=True, padding_value=0)
-    additional = torch.stack(additional)
-    return imgs, labels, additional
-
 config = CONFIG()
-train_files, val_files, test_files, max_H, max_W, max_seq_length = data_split()
+
+if config.dataset_source == 'huggingface':
+    print("Using Hugging Face dataset...")
+    train_dataset, val_dataset, test_dataset = create_hf_dataloaders(config)
+    max_H, max_W = 256, 256
+    collate_fn = collate_fn_hf
+else:
+    print("Using local dataset...")
+    train_files, val_files, test_files, max_H, max_W, max_seq_length = data_split()
+    train_dataset = ShorthandGenerationDataset(train_files, max_H, max_W, aug_types=9, max_label_leng=max_seq_length, channels=1)
+    val_dataset = ShorthandGenerationDataset(val_files, max_H, max_W, aug_types=1, max_label_leng=max_seq_length, channels=1)
+    test_dataset = ShorthandGenerationDataset(test_files, max_H, max_W, aug_types=1, max_label_leng=max_seq_length, channels=1)
+    
+    def collate_fn(batch):
+        imgs, labels, additional = zip(*batch)
+        imgs = pad_sequence(imgs, batch_first=True, padding_value=0)
+        labels = pad_sequence(labels, batch_first=True, padding_value=0)
+        additional = torch.stack(additional)
+        return imgs, labels, additional
 
 tracker = TrainingTracker()
-
-train_dataset = ShorthandGenerationDataset(train_files, max_H, max_W, aug_types=9, max_label_leng=max_seq_length, channels=1)
-val_dataset = ShorthandGenerationDataset(val_files, max_H, max_W, aug_types=1, max_label_leng=max_seq_length, channels=1)
-test_dataset = ShorthandGenerationDataset(test_files, max_H, max_W, aug_types=1, max_label_leng=max_seq_length, channels=1)
 
 train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, collate_fn=collate_fn)
 val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False, collate_fn=collate_fn)

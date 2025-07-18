@@ -8,3 +8,4 @@ tqdm
 Pillow
 seaborn
 editdistance
+datasets
