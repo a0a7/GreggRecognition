@@ -6,6 +6,7 @@ from torch.nn.utils.rnn import pad_sequence
 from model import Model
 from dataloader import ShorthandGenerationDataset, data_split
 from config import CONFIG
+from utils.training_tracker import TrainingTracker
 from tqdm import tqdm
 import os
 
@@ -40,6 +41,8 @@ def collate_fn(batch):
 config = CONFIG()
 train_files, val_files, test_files, max_H, max_W, max_seq_length = data_split()
 
+tracker = TrainingTracker()
+
 train_dataset = ShorthandGenerationDataset(train_files, max_H, max_W, aug_types=9, max_label_leng=max_seq_length, channels=1)
 val_dataset = ShorthandGenerationDataset(val_files, max_H, max_W, aug_types=1, max_label_leng=max_seq_length, channels=1)
 test_dataset = ShorthandGenerationDataset(test_files, max_H, max_W, aug_types=1, max_label_leng=max_seq_length, channels=1)
@@ -62,6 +65,9 @@ best_val_loss = float('inf')
 num_epochs = 10
 for epoch in range(num_epochs):
     model.train()
+    epoch_loss = 0
+    num_batches = 0
+    
     for imgs, labels, targets in tqdm(train_loader, desc=f"Epoch {epoch+1}"):
         imgs, labels, targets = imgs.to(device), labels.to(device), targets.to(device)
         
@@ -73,6 +79,11 @@ for epoch in range(num_epochs):
         
         loss.backward()
         optimizer.step()
+        
+        epoch_loss += loss.item()
+        num_batches += 1
+    
+    avg_train_loss = epoch_loss / num_batches
     
     model.eval()
     val_loss = 0
@@ -93,6 +104,8 @@ for epoch in range(num_epochs):
     accuracy = 100 * correct / total
     print(f'Epoch {epoch+1}, Val Loss: {val_loss:.4f}, Accuracy: {accuracy:.2f}%')
     
+    tracker.update(epoch+1, avg_train_loss, val_loss, accuracy)
+    
     scheduler.step()
     
     if val_loss < best_val_loss:
@@ -101,5 +114,6 @@ for epoch in range(num_epochs):
         print(f'New best model saved with loss: {val_loss:.4f}')
 
 print('Training completed!')
+tracker.plot_metrics()
 test_loss, test_accuracy = evaluate_model(model, test_loader, device, criterion)
 print(f'Test Loss: {test_loss:.4f}, Test Accuracy: {test_accuracy:.2f}%')
