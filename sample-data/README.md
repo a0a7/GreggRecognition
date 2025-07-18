@@ -1,0 +1,2 @@
+This data comes curtesy of Fangzhou Zhai, Yue Fan, Tejaswani Verma, Rupali Sinha, Dietrich KlakowAuthors Info & Claims from their paper [A Dataset and a Novel Neural Approach for Optical Gregg Shorthand Recognition
+](https://doi.org/10.1007/978-3-030-00794-2_24)
