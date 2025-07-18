@@ -20,12 +20,23 @@ def evaluate_model(model, test_loader, device, criterion):
         for imgs, labels, targets in test_loader:
             imgs, labels, targets = imgs.to(device), labels.to(device), targets.to(device)
             outputs = model(imgs, labels)
-            outputs_flat = outputs.view(-1, outputs.size(-1))
-            test_loss += criterion(outputs_flat, targets.view(-1)).item()
             
-            _, predicted = torch.max(outputs_flat.data, 1)
-            total += targets.view(-1).size(0)
-            correct += (predicted == targets.view(-1)).sum().item()
+            # Handle output shape properly
+            if outputs.dim() == 3:
+                outputs = outputs[:, -1, :]
+            elif outputs.dim() == 2:
+                pass
+            else:
+                outputs = outputs.view(outputs.size(0), -1)
+            
+            if targets.dim() > 1:
+                targets = targets.view(-1)
+                
+            test_loss += criterion(outputs, targets).item()
+            
+            _, predicted = torch.max(outputs.data, 1)
+            total += targets.size(0)
+            correct += (predicted == targets).sum().item()
     
     test_loss = test_loss / len(test_loader)
     accuracy = 100 * correct / total
@@ -74,8 +85,22 @@ for epoch in range(num_epochs):
         optimizer.zero_grad()
         outputs = model(imgs, labels)
         
-        outputs_flat = outputs.view(-1, outputs.size(-1))
-        loss = criterion(outputs_flat, targets.view(-1))
+        # Handle output shape properly
+        if outputs.dim() == 3:
+            # If outputs are [batch, seq_len, vocab_size], take the last timestep
+            outputs = outputs[:, -1, :]  # [batch, vocab_size]
+        elif outputs.dim() == 2:
+            # Already [batch, vocab_size]
+            pass
+        else:
+            # Flatten to [batch, vocab_size]
+            outputs = outputs.view(outputs.size(0), -1)
+        
+        # Ensure targets are [batch]
+        if targets.dim() > 1:
+            targets = targets.view(-1)
+            
+        loss = criterion(outputs, targets)
         
         loss.backward()
         optimizer.step()
@@ -93,12 +118,23 @@ for epoch in range(num_epochs):
         for imgs, labels, targets in val_loader:
             imgs, labels, targets = imgs.to(device), labels.to(device), targets.to(device)
             outputs = model(imgs, labels)
-            outputs_flat = outputs.view(-1, outputs.size(-1))
-            val_loss += criterion(outputs_flat, targets.view(-1)).item()
             
-            _, predicted = torch.max(outputs_flat.data, 1)
-            total += targets.view(-1).size(0)
-            correct += (predicted == targets.view(-1)).sum().item()
+            # Handle output shape properly
+            if outputs.dim() == 3:
+                outputs = outputs[:, -1, :]
+            elif outputs.dim() == 2:
+                pass
+            else:
+                outputs = outputs.view(outputs.size(0), -1)
+            
+            if targets.dim() > 1:
+                targets = targets.view(-1)
+                
+            val_loss += criterion(outputs, targets).item()
+            
+            _, predicted = torch.max(outputs.data, 1)
+            total += targets.size(0)
+            correct += (predicted == targets).sum().item()
     
     val_loss = val_loss / len(val_loader)
     accuracy = 100 * correct / total
