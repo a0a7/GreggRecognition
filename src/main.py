@@ -3,6 +3,8 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torch.nn.utils.rnn import pad_sequence
+from torch.cuda.amp import GradScaler, autocast
+import torch.nn.utils as utils
 from model import Model
 from dataloader import ShorthandGenerationDataset, data_split
 from hf_dataloader import create_hf_dataloaders, collate_fn_hf
@@ -73,17 +75,35 @@ else:
 
 tracker = TrainingTracker()
 
-train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, collate_fn=collate_fn)
-val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False, collate_fn=collate_fn)
-test_loader = DataLoader(test_dataset, batch_size=config.batch_size, shuffle=False, collate_fn=collate_fn)
+train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, collate_fn=collate_fn, 
+                         num_workers=config.num_workers, pin_memory=config.pin_memory)
+val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False, collate_fn=collate_fn,
+                       num_workers=config.num_workers, pin_memory=config.pin_memory)
+test_loader = DataLoader(test_dataset, batch_size=config.batch_size, shuffle=False, collate_fn=collate_fn,
+                        num_workers=config.num_workers, pin_memory=config.pin_memory)
 
 model = Model(max_H, max_W, config)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = model.to(device)
 
+# Compile model for faster inference (PyTorch 2.0+)
+if config.compile_model and hasattr(torch, 'compile'):
+    try:
+        model = torch.compile(model)
+        print("Model compiled for faster training")
+    except Exception as e:
+        print(f"Model compilation failed: {e}")
+
+print(f"Using device: {device}")
+
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=config.learning_rate)
+optimizer = optim.Adam(model.parameters(), lr=config.learning_rate, weight_decay=config.weight_decay)
 scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.5)
+
+# Mixed precision scaler
+scaler = GradScaler() if config.use_mixed_precision and device.type == 'cuda' else None
+if scaler:
+    print("Using mixed precision training")
 
 os.makedirs('models', exist_ok=True)
 best_val_loss = float('inf')
